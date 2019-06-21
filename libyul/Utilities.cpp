@@ -26,9 +26,82 @@
 #include <libdevcore/CommonData.h>
 #include <libdevcore/FixedHash.h>
 
+#include <boost/algorithm/string.hpp>
+
+#include <algorithm>
+#include <sstream>
+#include <vector>
+
 using namespace std;
 using namespace dev;
 using namespace yul;
+
+using boost::split;
+using boost::is_any_of;
+
+string yul::reindent(string const& _code)
+{
+	auto const static trimWhitespace = [](string _s) -> string
+	{
+		auto const static isnospace = [](int _ch) { return !std::isspace(_ch); };
+		_s.erase(_s.begin(), std::find_if(_s.begin(), _s.end(), isnospace));
+		_s.erase(find_if(_s.rbegin(), _s.rend(), isnospace).base(), _s.end());
+		return _s;
+	};
+
+	auto const static countBraces = [](string const& _s, int depth) -> int
+	{
+		unsigned slashCount = 0; // Ignore braces after // or ///.
+		for (char c : _s)
+		{
+			switch (c)
+			{
+				case '/':
+					slashCount++;
+					break;
+				case '{':
+				case '(':
+					if (slashCount < 2)
+					{
+						++depth;
+						slashCount = 0;
+					}
+					break;
+				case '}':
+				case ')':
+					if (slashCount < 2)
+					{
+						--depth;
+						slashCount = 0;
+					}
+					break;
+				default:
+					if (slashCount < 2)
+						slashCount = 0;
+					break;
+			}
+		}
+		return depth;
+	};
+
+
+	vector<string> lines;
+	split(lines, _code, is_any_of("\n"));
+	for_each(begin(lines), end(lines), trimWhitespace);
+
+	stringstream out;
+	int depth = 0;
+
+	for (string const& line : lines)
+	{
+		for (int i = 0; i < depth; ++i)
+			out << "    ";
+		out << line << '\n';
+		depth = countBraces(line, depth);
+	}
+
+	return out.str();
+}
 
 u256 yul::valueOfNumberLiteral(Literal const& _literal)
 {

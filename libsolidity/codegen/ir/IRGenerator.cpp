@@ -30,6 +30,7 @@
 #include <libsolidity/codegen/CompilerUtils.h>
 
 #include <libyul/AssemblyStack.h>
+#include <libyul/Utilities.h>
 
 #include <libdevcore/CommonData.h>
 #include <libdevcore/Whiskers.h>
@@ -66,7 +67,11 @@ pair<string, string> IRGenerator::run(ContractDefinition const& _contract)
 		" *                !USE AT YOUR OWN RISK!               *\n"
 		" *******************************************************/\n\n";
 
-	return {warning + ir, warning + asmStack.print()};
+	string const reindentedIR = yul::reindent(ir);
+	yul::AssemblyStack asmStackCheck{m_evmVersion, yul::AssemblyStack::Language::StrictAssembly, {}};
+	solAssert(asmStackCheck.parseAndAnalyze("", reindentedIR), "Unexpected failure.");
+
+	return {warning + reindentedIR, warning + asmStack.print()};
 }
 
 string IRGenerator::generate(ContractDefinition const& _contract)
