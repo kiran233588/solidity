@@ -43,7 +43,7 @@ blockchain. The line ``uint storedData;`` declares a state variable called ``sto
 type ``uint`` (*u*\nsigned *int*\eger of *256* bits). You can think of it as a single slot
 in a database that you can query and alter by calling functions of the
 code that manages the database. In the case of Ethereum, this is always the owning
-contract. In this case, the functions ``set`` and ``get`` can be used to modify
+contract, or the contract that defines the functions. In this case, the functions ``set`` and ``get`` can be used to modify
 or retrieve the value of the variable.
 
 To access a state variable, you do not need the prefix ``this.`` as is common in
