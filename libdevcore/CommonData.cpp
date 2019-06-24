@@ -22,9 +22,15 @@
 #include <libdevcore/CommonData.h>
 #include <libdevcore/Exceptions.h>
 #include <libdevcore/Assertions.h>
+#include "libdevcore/keccak.h"
 #include <libdevcore/Keccak256.h>
 
 #include <boost/algorithm/string.hpp>
+
+// big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+#ifndef _MSC_VER
+#include <endian.h>
+#endif
 
 using namespace std;
 using namespace dev;
@@ -112,14 +118,35 @@ bool dev::passesAddressChecksum(string const& _str, bool _strict)
 	return s == dev::getChecksummedAddress(s);
 }
 
+Keccak digestKeccak(Keccak::Keccak256);
+const size_t BufferSize = 144*7*1024;
+char* buffer = new char[BufferSize];
+std::istream* input = NULL;
+
+
+
+
+
+
+
+
+
 string dev::getChecksummedAddress(string const& _addr)
 {
+	std::cout << "getChecksummedAddress addr - " << _addr << std::endl;
 	string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
 	assertThrow(s.length() == 40, InvalidAddress, "");
 	assertThrow(s.find_first_not_of("0123456789abcdefABCDEF") == string::npos, InvalidAddress, "");
+	
+	//h256 hash = keccak256(boost::algorithm::to_lower_copy(s, std::locale::classic()));
+	//input=s.c_str();
+	//(s.c_str())->read(buffer, BufferSize);
+	std::copy(s.begin(), s.end(), buffer);
+	std::size_t numBytesRead = size_t(input->gcount());
+	digestKeccak.add(buffer, numBytesRead);
+	h256 hash = keccak256(boost::algorithm::to_lower_copy(digestKeccak.getHash(),std::locale::classic()));
 
-	h256 hash = keccak256(boost::algorithm::to_lower_copy(s, std::locale::classic()));
-
+	std::cout << "getChecksummedAddress hash - " << digestKeccak.getHash() << std::endl;
 	string ret = "0x";
 	for (size_t i = 0; i < 40; ++i)
 	{
