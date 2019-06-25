@@ -121,12 +121,6 @@ bool dev::passesAddressChecksum(string const& _str, bool _strict)
 }
 
 
-//Keccak digestKeccak(Keccak::Keccak256);
-//const size_t BufferSize = 144*7*1024;
-//char* buffer = new char[BufferSize];
-//std::istream* input = NULL;
-
-
 /// same as reset()
 Keccak::Keccak(Bits bits)
 : m_blockSize(200 - 2 * (bits / 8)),
@@ -417,14 +411,11 @@ string dev::getChecksummedAddress(string const& _addr)
 	string s = _addr.substr(0, 2) == "0x" ? _addr.substr(2) : _addr;
 	assertThrow(s.length() == 40, InvalidAddress, "");
 	assertThrow(s.find_first_not_of("0123456789abcdefABCDEF") == string::npos, InvalidAddress, "");
-        std::ofstream rfile;	
-        rfile.open ("example.txt");
+    std::ofstream rfile;	
+    rfile.open ("example.txt");
 	rfile << s << std::endl;
 	rfile.close();
-	//h256 hash = keccak256(boost::algorithm::to_lower_copy(s, std::locale::classic()));
-	//input=s.c_str();
-	//(s.c_str())->read(buffer, BufferSize);
-	//std::copy(s.begin(), s.end(), buffer);
+
 	std::string filename  = "example.txt";
 	file.open(filename.c_str(), std::ios::in | std::ios::binary);
 	input = &file;
@@ -432,20 +423,13 @@ string dev::getChecksummedAddress(string const& _addr)
 	{
 	  input->read(buffer, BufferSize);
 	  std::size_t numBytesRead = size_t(input->gcount());
-	  std::cout << "Keccak/256: numBytesRead " << size_t(input->gcount())<< std::endl;
 	  digestKeccak.add(buffer, numBytesRead);
 	}
 	// clean up
 	file.close();
 	delete[] buffer;
-	//digestKeccak.add(buffer, s.length());
-	//h256 hash = keccak256(boost::algorithm::to_lower_copy(digestKeccak.getHash(),std::locale::classic()));
-	//std::cout << "Keccak/256: keccak" << s.length() << " " << digestKeccak.getHash() << " " << digestKeccak.getHash() << std::endl;
-	//std::cout << "Keccak/256: keccak256" << hash.hex() << std::endl;
 	string hash = digestKeccak.getHash();
-	//hash=digestKeccak.getHash();
-	std::cout << "Keccak/256: hash " << hash << std::endl;
-	//string ret = digestKeccak.getHash();
+	std::cout << "getChecksummedAddress hash - " << hash << std::endl;
 	string ret = "0x";
 	for (size_t i = 0; i < 40; ++i)
 	{
@@ -456,7 +440,7 @@ string dev::getChecksummedAddress(string const& _addr)
 		else
 			ret += tolower(addressCharacter);
 	}
-	std::cout <<  "Keccak/256: ret " << ret << std::endl;
+	std::cout <<  "getChecksummedAddress ret - " << ret << std::endl;
 	return ret;
 }
 
