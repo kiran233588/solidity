@@ -412,11 +412,11 @@ string dev::getChecksummedAddress(string const& _addr)
 	assertThrow(s.length() == 40, InvalidAddress, "");
 	assertThrow(s.find_first_not_of("0123456789abcdefABCDEF") == string::npos, InvalidAddress, "");
     std::ofstream rfile;	
-    rfile.open ("example.txt");
+    rfile.open ("data");
 	rfile << s << std::endl;
 	rfile.close();
 
-	std::string filename  = "example.txt";
+	std::string filename  = "data";
 	file.open(filename.c_str(), std::ios::in | std::ios::binary);
 	input = &file;
 	while (*input)	
@@ -429,6 +429,7 @@ string dev::getChecksummedAddress(string const& _addr)
 	file.close();
 	delete[] buffer;
 	string hash = digestKeccak.getHash();
+	hash = digestKeccak.getHash();
 	std::cout << "getChecksummedAddress hash - " << hash << std::endl;
 	string ret = "0x";
 	for (size_t i = 0; i < 40; ++i)
